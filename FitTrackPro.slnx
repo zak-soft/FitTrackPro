@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="FitTrackPro.Api/FitTrackPro.Api.csproj" />
+  <Project Path="FitTrackPro.Application/FitTrackPro.Application.csproj" />
+  <Project Path="FitTrackPro.Domain/FitTrackPro.Domain.csproj" />
+  <Project Path="FitTrackPro.Infrastructure/FitTrackPro.Infrastructure.csproj" />
+  <Project Path="FitTrackPro.Tests/FitTrackPro.Tests.csproj" />
+</Solution>
