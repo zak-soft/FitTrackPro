@@ -1,3 +1,41 @@
+// j'importe mon contexte de base de données
+using FitTrackPro.Infrastructure.Data;
+
+// j'importe Entity Framework Core
+using Microsoft.EntityFrameworkCore;
+
+// je démarre la configuration de mon application
+var builder = WebApplication.CreateBuilder(args);
+
+// j'ajoute la base de données SQLite à mon application
+// "fittrack.db" = le nom du fichier qui sera créé sur le disque
+builder.Services.AddDbContext<FitTrackDbContext>(options =>
+    options.UseSqlite("Data Source=fittrack.db"));
+
+// j'active les Controllers (mes endpoints seront dans des fichiers séparés)
+builder.Services.AddControllers();
+
+// j'active Swagger pour pouvoir tester mon API dans le navigateur
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// je construis l'application avec tous les services configurés au-dessus
+var app = builder.Build();
+
+// j'active l'interface Swagger (accessible sur /swagger)
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// je force les requêtes HTTP à passer en HTTPS
+app.UseHttpsRedirection();
+
+// je branche mes Controllers pour qu'ils reçoivent les requêtes
+app.MapControllers();
+
+// je lance le serveur — l'application tourne et attend des requêtes
+app.Run();
+
+/* mon code de test au tout debut 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -58,4 +96,4 @@ app.Run();
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+}*/

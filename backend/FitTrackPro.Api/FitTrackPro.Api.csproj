@@ -8,11 +8,18 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FitTrackPro.Domain\FitTrackPro.Domain.csproj" />
+    <ProjectReference Include="..\FitTrackPro.Application\FitTrackPro.Application.csproj" />
+    <ProjectReference Include="..\FitTrackPro.Infrastructure\FitTrackPro.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
