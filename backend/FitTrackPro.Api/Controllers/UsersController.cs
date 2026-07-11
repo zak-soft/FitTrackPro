@@ -17,27 +17,30 @@ namespace FitTrackPro.Api.Controllers;
 public class UsersController : ControllerBase
 {
     // je stocke la connexion à la base de données
+    //Je déclare une variable _context qui me permet de communiquer avec la base de données depuis n'importe quelle méthode de mon Controller. 
     private readonly FitTrackDbContext _context;
 
-    // je reçois la connexion BDD automatiquement (injection de dépendances)
-    public UsersController(FitTrackDbContext context)
+    //je déclare une variable que je peux call depuis n'importe quelle methode 
+    private readonly UserService _userService;
+
+    // le constructeur reçoit automatiquement 2 choses au démarrage (injection de dépendances) :
+    // - la connexion à la base de données
+    // - le service qui contient la logique métier
+    public UsersController(FitTrackDbContext context, UserService userService)
     {
+        // je stocke la connexion BDD dans ma variable privée
         _context = context;
+        // je stocke le service utilisateur dans ma variable privée
+        _userService = userService;
     }
 
     // cet endpoint répond aux requêtes POST sur /api/users/register
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterUserRequest request)
     {
-        // je crée un nouvel utilisateur avec les données reçues
-        var user = new User
-        {
-            Id = Guid.NewGuid(),        // je génère un identifiant unique
-            FirstName = request.FirstName,
-            Email = request.Email,
-            //L'utilisateur envoie son mot de passe depuis React/Postman et je stocke dans la base de donnees 
-            PasswordHash = request.Password // temporaire, pas encore sécurisé
-        };
+        // Le Controller ne sait plus comment créer un utilisateur.
+        //Il dit simplement : "UserService, crée-moi un utilisateur."
+        var user = _userService.CreateUser(request);
 
         // j'ajoute l'utilisateur dans la base de données
         _context.Users.Add(user);

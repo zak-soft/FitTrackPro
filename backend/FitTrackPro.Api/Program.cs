@@ -3,6 +3,7 @@ using FitTrackPro.Infrastructure.Data;
 
 // j'importe Entity Framework Core
 using Microsoft.EntityFrameworkCore;
+using FitTrackPro.Application.Users;
 
 // je démarre la configuration de mon application
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +15,14 @@ builder.Services.AddDbContext<FitTrackDbContext>(options =>
 
 // j'active les Controllers (mes endpoints seront dans des fichiers séparés)
 builder.Services.AddControllers();
+//je dis à .NET : "UserService existe, sache le créer et l'injecter automatiquement"
+// une instance sera créée par requête HTTP
+builder.Services.AddScoped<UserService>();
 
 // j'active Swagger pour pouvoir tester mon API dans le navigateur
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 // je construis l'application avec tous les services configurés au-dessus
 var app = builder.Build();
