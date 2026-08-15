@@ -4,6 +4,8 @@ using FitTrackPro.Infrastructure.Data;
 // j'importe Entity Framework Core
 using Microsoft.EntityFrameworkCore;
 using FitTrackPro.Application.Users;
+using FitTrackPro.Application.Interfaces;
+using FitTrackPro.Infrastructure.Repositories;
 
 // je démarre la configuration de mon application
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 // "fittrack.db" = le nom du fichier qui sera créé sur le disque
 builder.Services.AddDbContext<FitTrackDbContext>(options =>
     options.UseSqlite("Data Source=fittrack.db"));
+//Pourquoi AddScoped? Les durées de vie des services sont importantes :Transient : nouvelle instance à chaque utilisation.
+//Scoped : une instance par requête HTTP. ✅ C'est le choix recommandé pour DbContext et les repositories.
+//Singleton : une seule instance pendant toute la durée de vie de l'application.
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<UserService>();
 
 // j'active les Controllers (mes endpoints seront dans des fichiers séparés)
 builder.Services.AddControllers();

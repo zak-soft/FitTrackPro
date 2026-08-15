@@ -1,5 +1,5 @@
 namespace FitTrackPro.Application.Users;
-//registerUser request ne fait rien de particulier il juste reçoit les données : 
+//registerUser request ne fait rien de particulier il  reçoit juste les données : 
 //C'est juste un conteneur de données — il transporte ce que l'utilisateur a tapé dans le formulaire. Il ne fait rien, il contient juste des infos.
 //Userservice : transforme en vrai User
 public class RegisterUserRequest

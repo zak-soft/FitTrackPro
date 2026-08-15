@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FitTrackPro.Domain\FitTrackPro.Domain.csproj" />
+    <ProjectReference Include="..\FitTrackPro.Application\FitTrackPro.Application.csproj" />
   </ItemGroup>
 
 </Project>
