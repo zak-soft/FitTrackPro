@@ -16,6 +16,7 @@ public class FitTrackDbContext : DbContext
     public FitTrackDbContext(DbContextOptions<FitTrackDbContext> options)
         : base(options)
     {
+        //il fait : Application -> Repository -> DbContext -> EF Core ->SQLite
     }
 
     // je dis à Entity Framework que j'ai une table "Users" dans ma BDD

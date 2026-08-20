@@ -1,0 +1,125 @@
+# déclenche automatiquement le pipeline à chaque push sur la branche "main"
+trigger:
+- main
+
+# déclenche aussi le pipeline quand une Pull Request cible la branche "main"
+# (permet de valider le code AVANT qu'il soit fusionné)
+pr:
+- main
+
+# on demande une machine virtuelle Ubuntu fournie par Azure DevOps pour exécuter le pipeline
+pool:
+  vmImage: ubuntu-latest
+
+# variables réutilisables dans tout le fichier, pour éviter de répéter les mêmes valeurs
+variables:
+  buildConfiguration: 'Release'              # on compile en mode Release (optimisé), pas Debug
+  apiProject: 'backend/FitTrackPro.Api/FitTrackPro.Api.csproj'      # chemin vers le projet API
+  testProject: 'backend/FitTrackPro.Tests/FitTrackPro.Tests.csproj' # chemin vers le projet de tests
+  dockerImage: 'fittrackpro-api'             # nom qu'on donnera à l'image Docker construite
+
+# un pipeline est découpé en "stages" (étapes de haut niveau), exécutées dans l'ordre
+stages:
+
+# ===== CI + SECURITY =====
+
+# premier stage : build, tests, et vérifications de sécurité
+- stage: BuildAndSecurity
+  displayName: "Build, Test & Security"   # nom affiché dans l'interface Azure DevOps
+
+  # un stage contient des "jobs" (unités d'exécution, peuvent tourner en parallèle)
+  jobs:
+
+  - job: Build
+    displayName: "Build & Test"
+
+    # un job contient une liste de "steps" (étapes), exécutées les unes après les autres
+    steps:
+
+    # === Checkout ===
+
+    # récupère le code source du dépôt Git (obligatoire en général en première étape)
+    - checkout: self
+      displayName: "Checkout repository"
+
+
+    # === Install .NET ===
+
+    # installe le SDK .NET sur la machine virtuelle du pipeline
+    - task: UseDotNet@2
+      displayName: "Install .NET SDK"
+
+      inputs:
+        packageType: 'sdk'
+        version: '10.0.x'        # installe la dernière version 10.0.x disponible
+
+
+    # === Restore ===
+
+    # télécharge tous les packages NuGet nécessaires au projet API
+    - script: |
+        dotnet restore $(apiProject)
+      displayName: "Restore dependencies"
+
+
+    # === Security - NuGet vulnerability check ===
+
+    # vérifie si des packages NuGet utilisés (même indirectement) ont des failles de sécurité connues
+    - script: |
+        dotnet list $(apiProject) package --vulnerable --include-transitive
+      displayName: "Scan NuGet dependencies"
+
+
+    # === Build ===
+
+    # compile le projet API en mode Release
+    - script: |
+        dotnet build $(apiProject) \
+          --configuration $(buildConfiguration) \
+          --no-restore        # inutile de refaire un restore, déjà fait juste avant
+      displayName: "Build application"
+
+
+    # === Tests ===
+
+    # exécute tous les tests unitaires du projet de tests
+    - script: |
+        dotnet test $(testProject) \
+          --configuration $(buildConfiguration) \
+          --no-restore
+      displayName: "Run tests"
+
+
+# ===== DOCKER =====
+
+# deuxième stage : construction de l'image Docker
+- stage: Docker
+  displayName: "Docker"
+
+  # ce stage ne démarre que si "BuildAndSecurity" a réussi
+  dependsOn: BuildAndSecurity
+  condition: succeeded()
+
+  jobs:
+
+  - job: DockerBuild
+    displayName: "Build Docker image"
+
+    steps:
+
+    # === Build Docker image ===
+
+    # construit l'image Docker à partir du Dockerfile présent à la racine du dépôt
+    - script: |
+        docker build \
+          -t $(dockerImage):$(Build.BuildId) \    # tag l'image avec un nom + le numéro de build unique
+          .                                        # le point = construire depuis le dossier courant
+      displayName: "Build Docker image"
+
+
+    # === Docker image information ===
+
+    # liste les images Docker présentes, juste pour vérifier/débugger dans les logs du pipeline
+    - script: |
+        docker images
+      displayName: "Display Docker images"

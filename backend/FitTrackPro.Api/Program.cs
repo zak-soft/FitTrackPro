@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using FitTrackPro.Application.Users;
 using FitTrackPro.Application.Interfaces;
 using FitTrackPro.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
+using FitTrackPro.Domain.Entities; 
 
 // je démarre la configuration de mon application
 var builder = WebApplication.CreateBuilder(args);
@@ -15,20 +17,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<FitTrackDbContext>(options =>
     options.UseSqlite("Data Source=fittrack.db"));
 //Pourquoi AddScoped? Les durées de vie des services sont importantes :Transient : nouvelle instance à chaque utilisation.
-//Scoped : une instance par requête HTTP. ✅ C'est le choix recommandé pour DbContext et les repositories.
+//Scoped : une instance par requête HTTP. C'est le choix recommandé pour DbContext et les repositories.
 //Singleton : une seule instance pendant toute la durée de vie de l'application.
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<UserService>();
-
+builder.Services.AddScoped<IUserService, UserService>();
 // j'active les Controllers (mes endpoints seront dans des fichiers séparés)
 builder.Services.AddControllers();
-//je dis à .NET : "UserService existe, sache le créer et l'injecter automatiquement"
-// une instance sera créée par requête HTTP
-builder.Services.AddScoped<UserService>();
 
 // j'active Swagger pour pouvoir tester mon API dans le navigateur
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//je fournis le mdp hasher si un service le demande
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 
 // je construis l'application avec tous les services configurés au-dessus
